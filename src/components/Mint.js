@@ -1,9 +1,34 @@
 import React from 'react';
 import { Box, Grid, TextField, 
-    Button, Paper, 
+    Button, Paper, CircularProgress,
     Typography} from '@mui/material';
 
 const MyComponent = () => {
+  const [textInput, setTextInput] = React.useState('');
+  const [imgUrl, setImgUrl] = React.useState('');
+  const [isGenerating, setIsGenerating] = React.useState(false);
+
+  const handleGenerate = () => {
+    async function query(data) {
+        setIsGenerating(true);
+        const response = await fetch(
+            "https://api-inference.huggingface.co/models/ehristoforu/dalle-3-xl-v2",
+            {
+                headers: { Authorization: "Bearer " + process.env.REACT_APP_HUGGINGFACE_API_KEY },
+                method: "POST",
+                body: JSON.stringify(data),
+            }
+        );
+        const result = await response.blob();
+        return result;
+    }
+    query({"inputs": textInput}).then((response) => {
+        const url = URL.createObjectURL(response);
+        setImgUrl(url);
+        setIsGenerating(false);
+    });
+  };
+
   return (
     <Box
       sx={{
@@ -17,6 +42,8 @@ const MyComponent = () => {
         <Grid item>
           <Paper elevation={3} sx={{ width: 475, height: 300, padding: 2, borderRadius: 4, backgroundColor: '#ffffff52' }}>
             <TextField
+              value={textInput}
+              onChange={(event) => setTextInput(event.target.value)}
               label="Your Prompt"
               multiline
               rows={6.5}
@@ -28,60 +55,74 @@ const MyComponent = () => {
                 boxSizing: 'border-box',
                 padding: 10,
                 fontSize: 16,
-                '.MuiInputBase-root': {
+                '.MuiInputBaseRoot': {
                     backgroundColor: '#f5f5f5',
                     color: '#000000',
                     borderRadius: 3,
                     textTransform: 'none',
                   },
-                '.MuiInputLabel-root': {
+                '.MuiInputBaseRoot': {
                     fontFamily: 'Montserrat Alternates',
                     color: '#000000',
                   }
               }}
             />
-            <Button variant="contained" sx={{ 
-                marginTop: 1, 
-                width: '100%', 
-                borderRadius: 3, 
-                textTransform: 'none',
-                backgroundColor: '#f5f5f5',
-                color: '#000000',
-                fontFamily: 'Montserrat Alternates',
-                fontWeight: 'bolder',
-                transition: 'all 0.2s ease',
-                ':hover': {
-                  backgroundColor: '#f5f5f5',
-                  color: '#000000',
-                  fontFamily: 'Montserrat Alternates',
-                  fontWeight: 'bolder',
-                  fontSize: 17
-                }
-              }}>Generate</Button>
-              <Button variant="contained" sx={{
-                marginTop: 1,
-                width: '100%',
-                borderRadius: 3,
-                textTransform: 'none',
-                backgroundColor: '#f5f5f5',
-                color: '#000000',
-                fontFamily: 'Montserrat Alternates',
-                fontWeight: 'bolder',
-                transition: 'all 0.2s ease',
-                ':hover': {
-                  backgroundColor: '#f5f5f5',
-                  color: '#000000',
-                  fontFamily: 'Montserrat Alternates',
-                  fontWeight: 'bolder',
-                  fontSize: 17
-                }
-              }}>Mint it!</Button>
+            <Button variant="contained" 
+               onClick={handleGenerate}
+               disabled={isGenerating}
+               sx={{ 
+                   marginTop: 1, 
+                   width: '100%', 
+                   borderRadius: 3, 
+                   textTransform: 'none',
+                   backgroundColor: '#f5f5f5',
+                   color: '#000000',
+                   fontFamily: 'Montserrat Alternates',
+                   fontWeight: 'bolder',
+                   transition: 'all 0.2s ease',
+                   padding: 1,
+                   ':hover': {
+                     backgroundColor: '#f5f5f5',
+                     color: '#000000',
+                     fontFamily: 'Montserrat Alternates',
+                     fontWeight: 'bolder',
+                     fontSize: 17
+                   }
+                 }}>
+                {isGenerating ? <div>
+                  Generating...
+                  <CircularProgress size={15} thickness={8} sx={{ verticalAlign: 'middle', m: 1 }} />
+                </div> : 'Generate Image'}
+              </Button>
+              <Button variant="contained"
+               disabled={isGenerating}
+               sx={{
+                 marginTop: 1,
+                 width: '100%',
+                 borderRadius: 3,
+                 textTransform: 'none',
+                 backgroundColor: '#f5f5f5',
+                 color: '#000000',
+                 fontFamily: 'Montserrat Alternates',
+                 fontWeight: 'bolder',
+                 transition: 'all 0.2s ease',
+                 padding: 1,
+                 ':hover': {
+                   backgroundColor: '#f5f5f5',
+                   color: '#000000',
+                   fontFamily: 'Montserrat Alternates',
+                   fontWeight: 'bolder',
+                   fontSize: 17
+                 }
+               }}>Mint it!</Button>
           </Paper>
         </Grid>
         <Grid item>
           <Paper elevation={3} sx={{ width: 450, height: 450, padding: 2, borderRadius: 4, backgroundColor: '#ffffff52' }}>
             <img
-              src="https://media.wired.com/photos/63a230c5bc8f933da1fe8493/master/pass/Business_YearEndReview_AI-ART.jpg"
+              src={
+                imgUrl || 'https://media.wired.com/photos/63a230c5bc8f933da1fe8493/master/pass/Business_YearEndReview_AI-ART.jpg'
+              }
               alt="Placeholder"
               style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '10px' }}
             />
@@ -89,8 +130,8 @@ const MyComponent = () => {
         </Grid>
       </Grid>
       <Grid container position={'absolute'} zIndex={1} sx={{ bottom: 0, top: '90%' }}> 
-         <Typography variant="h6" fontFamily={"Montserrat Alternates"} fontWeight={"bolder"} sx={{ ml: '5%' }} color="azure">
-            Network : Active 
+         <Typography fontFamily={"monospace, sans-serif"} fontWeight={"bolder"} sx={{ mr: 'auto', ml: 'auto', mt: '2%' }} color="black">
+            Network Status : Active 
             <img width="15px" height="15px" src="https://cdn3.emoji.gg/emojis/1193_lightgreen_circle.png" alt="Placeholder" style={{ marginLeft: '5px', verticalAlign: 'middle' }} />
          </Typography>
       </Grid>
