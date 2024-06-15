@@ -54,22 +54,22 @@ const MainComponent = () => {
         </Typography>
         <Button 
           variant="contained"
-          href="/app"
+          href="/mint"
           sx={{ 
             position: 'absolute',
             backgroundColor: 'transparent',
             right: '43%',
             bottom: '5%',
-            fontSize: '1.3rem',
+            fontSize: '1.4rem',
             border: '2px solid azure',
             borderRadius: '25px',
             fontFamily: 'Montserrat Alternates',
             fontWeight: 'bolder',
             transition: 'all 0.2s ease-in-out',
             '&:hover': {
-              fontSize: '1.5rem',
               backgroundColor: 'azure',
-              color: 'lightslategrey'
+              color: 'lightslategrey',
+              px: '30px',
             }
            }}
         >
