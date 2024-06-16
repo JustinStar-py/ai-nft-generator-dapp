@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, Grid, TextField, 
     Button, Paper, CircularProgress,
     Typography} from '@mui/material';
-
+import axios from 'axios';
 
 const MyComponent = () => {
   const [textInput, setTextInput] = React.useState('');
@@ -10,29 +10,45 @@ const MyComponent = () => {
   const [isGenerating, setIsGenerating] = React.useState(false);
 
   const handleGenerate = async () => {
-    async function query(data) {
-        setIsGenerating(true);
-        const model1 = "ehristoforu/dalle-3-xl-v2";
-        const model2 = "stabilityai/stable-diffusion-xl-base-1.0";
-        const model3 = "stabilityai/stable-diffusion-2";
+    // async function query(data) {
+    //     setIsGenerating(true);
+    //     const model1 = "ehristoforu/dalle-3-xl-v2";
+    //     const model2 = "stabilityai/stable-diffusion-xl-base-1.0";
+    //     const model3 = "stabilityai/stable-diffusion-2";
         
-        const response = await fetch(
-            "https://api-inference.huggingface.co/models/" + model2,
-            {
-                headers: { Authorization: "Bearer " + process.env.REACT_APP_HUGGINGFACE_API_KEY },
-                method: "POST",
-                body: JSON.stringify(data),
-            }
-        );
-        const result = await response.blob();
-        return result;
-    }
-    query({"inputs": textInput}).then((response) => {
-        const url = URL.createObjectURL(response);
-        setImgUrl(url);
-        setIsGenerating(false);
-    });
+    //     const response = await fetch(
+    //         "https://api-inference.huggingface.co/models/" + model2,
+    //         {
+    //             headers: { Authorization: "Bearer " + process.env.REACT_APP_HUGGINGFACE_API_KEY },
+    //             method: "POST",
+    //             body: JSON.stringify(data),
+    //         }
+    //     );
+    //     const result = await response.blob();
+
+    //     return result;
+    // }
+    // query({"inputs": textInput}).then((response) => {
+    //     const url = URL.createObjectURL(response);
+    //     setImgUrl(url);
+    //     setIsGenerating(false);
+    // });
+    setImgUrl("https://airnfts.s3.amazonaws.com/nft-images/20220323/Doodles13_1648015508946.png");
   };
+
+  React.useEffect(() => {
+    // post image to server and get response
+    if (imgUrl !== '' && imgUrl !== undefined) {
+      const postImage = async () => {
+        await axios.post('http://localhost:5000/upload-to-ipfs', { 
+          image: imgUrl
+        }).then((response) => {
+           console.log(response);
+        })
+      }
+      postImage();
+    }
+  }, [imgUrl]);
 
   return (
     <Box
