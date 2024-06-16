@@ -3,16 +3,21 @@ import { Box, Grid, TextField,
     Button, Paper, CircularProgress,
     Typography} from '@mui/material';
 
+
 const MyComponent = () => {
   const [textInput, setTextInput] = React.useState('');
   const [imgUrl, setImgUrl] = React.useState('');
   const [isGenerating, setIsGenerating] = React.useState(false);
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     async function query(data) {
         setIsGenerating(true);
+        const model1 = "ehristoforu/dalle-3-xl-v2";
+        const model2 = "stabilityai/stable-diffusion-xl-base-1.0";
+        const model3 = "stabilityai/stable-diffusion-2";
+        
         const response = await fetch(
-            "https://api-inference.huggingface.co/models/ehristoforu/dalle-3-xl-v2",
+            "https://api-inference.huggingface.co/models/" + model2,
             {
                 headers: { Authorization: "Bearer " + process.env.REACT_APP_HUGGINGFACE_API_KEY },
                 method: "POST",
