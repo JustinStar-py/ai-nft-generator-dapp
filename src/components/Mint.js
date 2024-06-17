@@ -1,54 +1,200 @@
 import React from 'react';
 import { Box, Grid, TextField, 
     Button, Paper, CircularProgress,
-    Typography} from '@mui/material';
+    Typography, Modal} from '@mui/material';
 import axios from 'axios';
+import { Buffer } from 'buffer';
+
+
+const MintingModal = ({ open, handleClose, handleMint, nftMetadata, setNftMetadata }) => {
+  const [name, setName] = React.useState('');
+  const [description, setDescription] = React.useState('');
+
+  const onMint = () => {
+    setNftMetadata({ ...nftMetadata, name, description });
+    handleMint(name, description);
+    setName('');
+    setDescription('');
+    handleClose();
+  };
+
+  return (
+    <Modal open={open} onClose={handleClose} aria-labelledby="minting-modal-title">
+      <Box sx={boxStyle}>
+        <Typography id="minting-modal-title" variant="h6" component="h2" fontWeight="bolder" fontFamily="Zen Dots">
+          Mint New NFT
+        </Typography>
+        <TextField
+          label="Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          fullWidth
+          required
+          margin="normal"
+          sx={{
+            '& .MuiInputBase-root': {
+              fontFamily: 'Montserrat Alternates',
+              fontWeight: 'bolder',
+              fontSize: 17,
+              borderRadius: 3,
+           }}}
+        />
+        <TextField
+          label="Description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          fullWidth
+          margin="normal"
+          sx={{
+            '& .MuiInputBase-root': {
+               fontFamily: 'Montserrat Alternates',
+               fontWeight: 'bolder',
+               fontSize: 17,
+               borderRadius: 3,
+            }}}
+        />
+        <Button variant="contained" color="primary" onClick={onMint} sx={buttonStyle}>
+          Confirm
+        </Button>
+        <Button variant="contained" onClick={handleClose} sx={cancellButtonStyle}>
+          Cancel
+        </Button>
+      </Box>
+    </Modal>
+  );
+};
+
+const boxStyle = {
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: 400,
+  bgcolor: 'background.paper',
+  border: '2px solid azure',
+  boxShadow: 24,
+  borderRadius: 3,
+  p: 4,
+};
+
+const buttonStyle = {
+  marginTop: 1,
+  width: '100%',
+  borderRadius: 3,
+  textTransform: 'none',
+  backgroundColor: '#f5f5f5',
+  color: '#000000',
+  fontFamily: 'Montserrat Alternates',
+  fontWeight: 'bolder',
+  transition: 'all 0.2s ease',
+  padding: 1,
+  ':hover':  {
+      backgroundColor: '#f5f5f5',
+      color: '#000000',
+      fontFamily: 'Montserrat Alternates',
+      fontWeight: 'bolder',
+      fontSize: 17
+      }
+}
+
+const cancellButtonStyle = {
+  marginTop: 1,
+  width: '100%',
+  borderRadius: 3,
+  textTransform: 'none',
+  backgroundColor: '#f5f5f5',
+  color: 'crimson',
+  fontFamily: 'Montserrat Alternates',
+  fontWeight: 'bolder',
+  transition: 'all 0.2s ease',
+  padding: 1,
+  ':hover':  {
+      backgroundColor: 'crimson',
+      color: '#f5f5f5',
+      fontFamily: 'Montserrat Alternates',
+      fontWeight: 'bolder',
+      fontSize: 17
+      }
+}
 
 const MyComponent = () => {
+  const [isOpenMintingModal, setOpenMintingModal] = React.useState(false);
   const [textInput, setTextInput] = React.useState('');
   const [imgUrl, setImgUrl] = React.useState('');
+  const [nftMetadata, setNftMetadata] = React.useState({
+    name: '',
+    description: '',
+    image: '',
+    attributes: [],
+  });
   const [isGenerating, setIsGenerating] = React.useState(false);
 
   const handleGenerate = async () => {
-    // async function query(data) {
-    //     setIsGenerating(true);
-    //     const model1 = "ehristoforu/dalle-3-xl-v2";
-    //     const model2 = "stabilityai/stable-diffusion-xl-base-1.0";
-    //     const model3 = "stabilityai/stable-diffusion-2";
+    async function query(data) {
+        setIsGenerating(true);
+        const model1 = "ehristoforu/dalle-3-xl-v2";
+        const model2 = "stabilityai/stable-diffusion-xl-base-1.0";
+        const model3 = "stabilityai/stable-diffusion-2";
         
-    //     const response = await fetch(
-    //         "https://api-inference.huggingface.co/models/" + model2,
-    //         {
-    //             headers: { Authorization: "Bearer " + process.env.REACT_APP_HUGGINGFACE_API_KEY },
-    //             method: "POST",
-    //             body: JSON.stringify(data),
-    //         }
-    //     );
-    //     const result = await response.blob();
+        const response = await fetch(
+            "https://api-inference.huggingface.co/models/" + model1,
+            {
+                headers: { Authorization: "Bearer " + process.env.REACT_APP_HUGGINGFACE_API_KEY },
+                method: "POST",
+                body: JSON.stringify(data),
+            }
+        );
+        const result = await response.blob();
 
-    //     return result;
-    // }
-    // query({"inputs": textInput}).then((response) => {
-    //     const url = URL.createObjectURL(response);
-    //     setImgUrl(url);
-    //     setIsGenerating(false);
-    // });
-    setImgUrl("https://airnfts.s3.amazonaws.com/nft-images/20220323/Doodles13_1648015508946.png");
+        return result;
+    }
+    query({"inputs": textInput}).then(async (response) => {
+        const url = URL.createObjectURL(response);
+        setImgUrl(url); 
+        
+        // convert image to base64
+        const reader = new FileReader();
+        reader.readAsDataURL(response);
+        reader.onloadend = () => {
+            const base64data = reader.result;
+            setNftMetadata({
+              ...nftMetadata,
+              image: base64data.replace(/^data:image\/[a-z]+;base64,/, ""),
+            });
+        };
+
+        setIsGenerating(false);
+    });
   };
 
-  React.useEffect(() => {
-    // post image to server and get response
-    if (imgUrl !== '' && imgUrl !== undefined) {
-      const postImage = async () => {
-        await axios.post('http://localhost:5000/upload-to-ipfs', { 
-          image: imgUrl
-        }).then((response) => {
-           console.log(response);
-        })
-      }
-      postImage();
-    }
-  }, [imgUrl]);
+  const handlePreviewMint = () => {
+     setOpenMintingModal(true);
+  }
+
+  const handleMint = async (name, description) => {
+    await axios.post('http://localhost:5000/upload-nft-data-to-ipfs', {
+      name,
+      description,
+      image: nftMetadata.image,
+      attributes: nftMetadata.attributes
+    }).then((response) => {
+        console.log(response);
+    })
+  }
+
+  // React.useEffect(() => {
+  //   // post image to server and get response
+  //   if (imgUrl !== '' && imgUrl !== undefined) {
+  //     const postImage = async () => {
+  //       await axios.post('http://localhost:5000/upload-image-to-ipfs', { 
+  //         image: imgUrl
+  //       }).then((response) => {
+  //          console.log(response);
+  //       })
+  //     }
+  //     postImage();
+  //   }
+  // }, [imgUrl])
 
   return (
     <Box
@@ -117,6 +263,7 @@ const MyComponent = () => {
               </Button>
               <Button variant="contained"
                disabled={isGenerating}
+               onClick={handlePreviewMint}
                sx={{
                  marginTop: 1,
                  width: '100%',
@@ -188,6 +335,15 @@ const MyComponent = () => {
              GENERATE IT MINT IT FOR FREE GENERATE IT
          </Typography>
       </Grid>
+
+      {/* minting modal */}
+      <MintingModal
+        open={isOpenMintingModal}
+        handleClose={() => setOpenMintingModal(false)}
+        handleMint={handleMint}
+        nftMetadata={nftMetadata}
+        setNftMetadata={setNftMetadata}
+      />
     </Box>
   );
 };

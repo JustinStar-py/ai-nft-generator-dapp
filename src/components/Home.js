@@ -1,11 +1,22 @@
 // src/MainComponent.js
 import React, { useState, useEffect } from 'react';
-import { Box, Container, Typography, Grid, Paper, Button } from '@mui/material';
+import { Box, Container, Typography, Grid, Paper, Button, keyframes } from '@mui/material';
 import mainGif from '../assets/img/pic.gif';
 import leftArrowGif from '../assets/img/left-arrow.gif';
 
+// translate right to left animation by keyframes
+const translateRightToLeft = keyframes`
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+`;
+
 const MainComponent = () => {
   const [rotation, setRotation] = useState({ x: 0, y: 0 });
+  const [scrollPosition, setScrollPosition] = useState(0);
 
   const handleMouseMove = (event) => {
     const { clientX, clientY } = event;
@@ -22,8 +33,13 @@ const MainComponent = () => {
     });
   };
 
+  const handleScroll = (event) => {
+    console.log(event.target.scrollTop);
+    setScrollPosition(event.target.scrollTop);
+  };
+
   return (
-    <Box onMouseMove={handleMouseMove} sx={{ height: '100vh', overflow: 'auto' }}>
+    <Box onMouseMove={handleMouseMove} onScroll={handleScroll} sx={{ height: '100vh', overflow: 'auto' }}>
       <Box
         sx={{
           display: 'flex',
@@ -47,6 +63,7 @@ const MainComponent = () => {
             width: '550px',
             height: '550px',
             transition: 'transform 0.1s ease-out',
+            filter: `hue-rotate(${scrollPosition / 10}deg)`,
           }}
         />
          <Typography variant="h2" fontFamily={"Montserrat Alternates"} fontWeight={"bolder"} sx={{ mr: '5%' }} color="azure">
@@ -65,7 +82,9 @@ const MainComponent = () => {
             borderRadius: '25px',
             fontFamily: 'Montserrat Alternates',
             fontWeight: 'bolder',
-            transition: 'all 0.2s ease-in-out',
+            transform: `translateX(-${scrollPosition*2}px)`,
+            opacity: scrollPosition < 150 ? 1 : 0.6,
+            transition: 'color 0.2s ease-in-out, background-color 0.2s ease-in-out, padding 0.2s ease-in-out, position 0.5s ease-in-out, opacity 0.5s ease-in-out, transform 0.5s ease-in-out',
             '&:hover': {
               backgroundColor: 'azure',
               color: 'lightslategrey',
@@ -77,9 +96,14 @@ const MainComponent = () => {
            <img src={leftArrowGif} alt="Arrow" style={{ width: '30px', height: '30px', marginLeft: '10px' }} />
         </Button>
       </Box>
-      <Container sx={{ marginTop: '50px' }}>
+      <Container sx={{ marginTop: '50px'}}>
         <Grid container spacing={4} justifyContent="center">
-          <Typography variant="h1" fontFamily={"Zen Dots"} color="snow">MINT IT! FREE! MINT IT! FREE! MINT IT! FREE! MINT IT! FREE! MINT IT! FREE!</Typography>
+          <Typography variant="h1" fontFamily={"Zen Dots"} color="snow" sx={{ 
+              transition: 'all 0.2s ease-in-out',
+              transform: scrollPosition > 310 ? 'translateX(0px)' : `translateX(-${scrollPosition}px)`, 
+              opacity: scrollPosition > 280 ? 1 : 0.1 }}>
+                 MINT IT! FREE! MINT IT! FREE! MINT IT! FREE! MINT IT! FREE! MINT IT! FREE!
+          </Typography>
         </Grid>
       </Container>
       <Container sx={{ marginTop: '50px' }}>
