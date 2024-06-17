@@ -58,7 +58,7 @@ app.post('/upload-nft-data-to-ipfs', async (req, res) => {
    const filePath = path.join(__dirname, 'public', 'nft-images', `${Date.now()}.png`);
    fs.writeFileSync(filePath, image, 'base64');
    
-   // save image to IPFS
+   // save image to IPFS as png
    const cid = await storage.upload(fs.readFileSync(filePath));
    const url = storage.resolveScheme(cid);
 

@@ -1,0 +1,62 @@
+{
+  "_format": "hh-sol-cache-2",
+  "files": {
+    "/root/projects/ai-nft-generator-dapp/contracts/contracts/AINFTCollectionFlat.sol": {
+      "lastModificationDate": 1718659993534,
+      "contentHash": "98321efd232df98a9eae29e3b3229c00",
+      "sourceName": "contracts/AINFTCollectionFlat.sol",
+      "solcConfig": {
+        "version": "0.8.17",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0",
+        "^0.8.0",
+        "^0.8.0",
+        "^0.8.1",
+        "^0.8.0",
+        "^0.8.0",
+        "^0.8.0",
+        "^0.8.0",
+        "^0.8.0",
+        "^0.8.0",
+        "^0.8.0",
+        "^0.8.2"
+      ],
+      "artifacts": [
+        "AINFTCollection",
+        "Address",
+        "Context",
+        "Counters",
+        "ERC165",
+        "ERC721",
+        "ERC721URIStorage",
+        "IERC165",
+        "IERC721",
+        "IERC721Metadata",
+        "IERC721Receiver",
+        "Strings"
+      ]
+    }
+  }
+}
