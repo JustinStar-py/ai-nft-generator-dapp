@@ -1,6 +1,11 @@
-# Getting Started with Create React App
+# AI NFT GENERATOR
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+<h3>✨Display</h3>
+
+![Mint page](https://github.com/JustinStar-py/ai-nft-generator-dapp/assets/86886502/0dcab511-e9a8-4227-90e6-8da2f520651f)
+![Home page](https://github.com/JustinStar-py/ai-nft-generator-dapp/assets/86886502/7e019f64-b1ca-430f-b8ff-88369370e4b4)
+
+
 
 ## Available Scripts
 
