@@ -137,7 +137,7 @@ const MyComponent = () => {
         const model3 = "stabilityai/stable-diffusion-2";
         
         const response = await fetch(
-            "https://api-inference.huggingface.co/models/" + model1,
+            "https://api-inference.huggingface.co/models/" + model2,
             {
                 headers: { Authorization: "Bearer " + process.env.REACT_APP_HUGGINGFACE_API_KEY },
                 method: "POST",

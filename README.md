@@ -2,7 +2,8 @@
 
 <h3>✨Display</h3>
 
-![Mint page](https://github.com/JustinStar-py/ai-nft-generator-dapp/assets/86886502/0dcab511-e9a8-4227-90e6-8da2f520651f)
+<image src="https://github.com/JustinStar-py/ai-nft-generator-dapp/assets/86886502/0dcab511-e9a8-4227-90e6-8da2f520651f" width="200" />
+
 ![Home page](https://github.com/JustinStar-py/ai-nft-generator-dapp/assets/86886502/7e019f64-b1ca-430f-b8ff-88369370e4b4)
 
 
