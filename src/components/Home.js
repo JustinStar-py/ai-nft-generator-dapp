@@ -1,7 +1,7 @@
 // src/MainComponent.js
 import React, { useState, useEffect } from 'react';
 import { Box, Container, Typography, Grid, Paper, Button, keyframes } from '@mui/material';
-import mainGif from '../assets/img/pic.gif';
+import mainGif from '../assets/img/greec.png';
 import leftArrowGif from '../assets/img/left-arrow.gif';
 
 // translate right to left animation by keyframes
@@ -57,13 +57,14 @@ const MainComponent = () => {
           alt="Animated Fox"
           style={{
             position: 'absolute',
-            right: '13%',
+            right: '25%',
             top: '50%',
             transform: `translate(-50%, -50%) rotateY(${rotation.y}deg) rotateX(${rotation.x}deg)`,
-            width: '550px',
-            height: '550px',
+            width: '390px',
+            height: '425px',
             transition: 'transform 0.1s ease-out',
-            filter: `hue-rotate(${scrollPosition / 10}deg)`,
+            // filter: `hue-rotate(${scrollPosition / 10}deg)`,
+            filter: `drop-shadow(1px 3px 100px blue) drop-shadow(46px -10px 30px green)`,
           }}
         />
          <Typography variant="h2" fontFamily={"Montserrat Alternates"} fontWeight={"bolder"} sx={{ mr: '5%' }} color="azure">

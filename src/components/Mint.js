@@ -4,7 +4,8 @@ import { Box, Grid, TextField,
     Typography, Modal} from '@mui/material';
 import axios from 'axios';
 import { Buffer } from 'buffer';
-
+import ERC721ABI from '../assets/abi/ERC721ABI.json';
+import { useSimulateContract, useWriteContract } from 'wagmi';
 
 const MintingModal = ({ open, handleClose, handleMint, nftMetadata, setNftMetadata }) => {
   const [name, setName] = React.useState('');
@@ -94,7 +95,7 @@ const buttonStyle = {
       fontFamily: 'Montserrat Alternates',
       fontWeight: 'bolder',
       fontSize: 17
-      }
+  }
 }
 
 const cancellButtonStyle = {
@@ -121,17 +122,23 @@ const MyComponent = () => {
   const [isOpenMintingModal, setOpenMintingModal] = React.useState(false);
   const [textInput, setTextInput] = React.useState('');
   const [imgUrl, setImgUrl] = React.useState('');
+  const [tokenURI, setTokenURI] = React.useState();
   const [nftMetadata, setNftMetadata] = React.useState({
     name: '',
     description: '',
     image: '',
     attributes: [],
   });
-  const [isGenerating, setIsGenerating] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState({
+     method: '',
+     status: false
+  });
+  const { writeContract } = useWriteContract()
 
   const handleGenerate = async () => {
+    if (isLoading.status === true) return;
     async function query(data) {
-        setIsGenerating(true);
+        setIsLoading({ status: true, method: 'generate' });
         const model1 = "ehristoforu/dalle-3-xl-v2";
         const model2 = "stabilityai/stable-diffusion-xl-base-1.0";
         const model3 = "stabilityai/stable-diffusion-2";
@@ -163,22 +170,33 @@ const MyComponent = () => {
             });
         };
 
-        setIsGenerating(false);
+        setIsLoading({ status: false, method: '' });
     });
   };
 
-  const handlePreviewMint = () => {
+  const handlePreviewMint = async () => {
+     if (isLoading.status === true) return;
      setOpenMintingModal(true);
   }
 
   const handleMint = async (name, description) => {
+    setIsLoading({ status: true, method: 'ipfs-upload' });
     await axios.post('http://localhost:5000/upload-nft-data-to-ipfs', {
       name,
       description,
       image: nftMetadata.image,
       attributes: nftMetadata.attributes
-    }).then((response) => {
-        console.log(response);
+    }).then(async (response) => {
+        if (response.status === 200) {
+          setOpenMintingModal(false);
+          setIsLoading({ ...isLoading, method: 'mint' });
+          await writeContract({
+              abi: ERC721ABI,
+              address: '0x0842AC2C94e6f8439B5256bCec61Cd68b2A7bbEf',
+              functionName: 'mint',
+              args: [response.data.url2]
+          })
+        }
     })
   }
 
@@ -203,11 +221,15 @@ const MyComponent = () => {
         flexDirection: 'row',
         alignItems: 'center',
         height: '100vh',
+        overflow: 'hidden',
       }}
     >
+      <Grid container sx={{ height: '100%' }} position="absolute" alignItems="right" justifyContent="right" top={'10px'} right={'10px'} zIndex={1}>
+        <w3m-button />
+      </Grid> 
       <Grid container spacing={2} alignItems="center" justifyContent="center" width="100%" zIndex={1} sx={{ alignItems: 'flex-start' }}>
         <Grid item>
-          <Paper elevation={3} sx={{ width: 475, height: 300, padding: 2, borderRadius: 4, backgroundColor: '#ffffff52' }}>
+          <Paper elevation={3} sx={{ width: 475, height: 305, padding: 2, borderRadius: 4, backgroundColor: '#ffffff52' }}>
             <TextField
               value={textInput}
               onChange={(event) => setTextInput(event.target.value)}
@@ -236,53 +258,27 @@ const MyComponent = () => {
             />
             <Button variant="contained" 
                onClick={handleGenerate}
-               disabled={isGenerating}
-               sx={{ 
-                   marginTop: 1, 
-                   width: '100%', 
-                   borderRadius: 3, 
-                   textTransform: 'none',
-                   backgroundColor: '#f5f5f5',
-                   color: '#000000',
-                   fontFamily: 'Montserrat Alternates',
-                   fontWeight: 'bolder',
-                   transition: 'all 0.2s ease',
-                   padding: 1,
-                   ':hover': {
-                     backgroundColor: '#f5f5f5',
-                     color: '#000000',
-                     fontFamily: 'Montserrat Alternates',
-                     fontWeight: 'bolder',
-                     fontSize: 17
-                   }
-                 }}>
-                {isGenerating ? <div>
+               sx={buttonStyle}>
+                {isLoading.method === 'generate' ? <div>
                   Generating...
                   <CircularProgress size={15} thickness={8} sx={{ verticalAlign: 'middle', m: 1 }} />
                 </div> : 'Generate Image'}
               </Button>
-              <Button variant="contained"
-               disabled={isGenerating}
-               onClick={handlePreviewMint}
-               sx={{
-                 marginTop: 1,
-                 width: '100%',
-                 borderRadius: 3,
-                 textTransform: 'none',
-                 backgroundColor: '#f5f5f5',
-                 color: '#000000',
-                 fontFamily: 'Montserrat Alternates',
-                 fontWeight: 'bolder',
-                 transition: 'all 0.2s ease',
-                 padding: 1,
-                 ':hover': {
-                   backgroundColor: '#f5f5f5',
-                   color: '#000000',
-                   fontFamily: 'Montserrat Alternates',
-                   fontWeight: 'bolder',
-                   fontSize: 17
-                 }
-               }}>Mint it!</Button>
+              <Button 
+                variant="contained"
+                onClick={handlePreviewMint}
+                sx={buttonStyle}> 
+                    {/*  if method is mint show minting with progress , and then if no, if the method is ipfs-upload show 'ipfs uploading' ,if no show mint */}
+                    {isLoading.method === 'mint' ? <div>
+                      Minting...
+                      <CircularProgress size={15} thickness={8} sx={{ verticalAlign: 'middle', m: 1 }} />
+                    </div> : 
+                      isLoading.method === 'ipfs-upload' ? 
+                        <div> 
+                            IPFS Uploading... <CircularProgress size={15} thickness={8} sx={{ verticalAlign: 'middle', m: 1 }} />
+                        </div> : 'Mint it!'
+                    }
+                </Button>
           </Paper>
         </Grid>
         <Grid item>
@@ -298,12 +294,12 @@ const MyComponent = () => {
         </Grid>
       </Grid>
       <Grid container position={'absolute'} zIndex={1} sx={{ bottom: 0, top: '90%' }}> 
-         <Typography fontFamily={"monospace, sans-serif"} fontWeight={"bolder"} sx={{ mr: 'auto', ml: 'auto', mt: '2%' }} color="black">
+         <Typography fontFamily={"monospace, sans-serif"} fontWeight={"bolder"} sx={{ mr: 'auto', ml: 'auto', mt: '2%' }} color="white">
             Network Status : Active 
             <img width="15px" height="15px" src="https://cdn3.emoji.gg/emojis/1193_lightgreen_circle.png" alt="Placeholder" style={{ marginLeft: '5px', verticalAlign: 'middle' }} />
          </Typography>
       </Grid>
-      <Grid container position={'absolute'} sx={{ bottom: 0, top: '0%', width: '100%', height: '10%', opacity: 0.1 }}> 
+      <Grid container position={'absolute'} sx={{ bottom: 0, top: '0%', width: '100%', height: '10%', opacity: 0.06 }}> 
          <Typography variant="h2" fontFamily={"Montserrat Alternates"} fontWeight={"bolder"} color="azure">
              GENERATE IT MINT IT FOR FREE GENERATE IT
          </Typography>
