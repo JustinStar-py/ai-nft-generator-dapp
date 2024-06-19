@@ -15,7 +15,7 @@ const translateRightToLeft = keyframes`
 `;
 
 const MainComponent = () => {
-  const [rotation, setRotation] = useState({ x: 0, y: 0 });
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [scrollPosition, setScrollPosition] = useState(0);
 
   const handleMouseMove = (event) => {
@@ -27,7 +27,7 @@ const MainComponent = () => {
     const deltaY = clientY - centerY;
 
     const rotationFactor = 3; // Increase this factor to increase speed and angle
-    setRotation({
+    setMousePosition({
       x: (deltaY / centerY) * 15 * rotationFactor,
       y: (deltaX / centerX) * 15 * rotationFactor,
     });
@@ -37,6 +37,16 @@ const MainComponent = () => {
     console.log(event.target.scrollTop);
     setScrollPosition(event.target.scrollTop);
   };
+
+  // generate random color by number that is passed
+  const generateRandomColor = (num) => {
+    const letters = '0123456789ABCDEF';
+    let color = '#';
+    for (let i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+  }
 
   return (
     <Box onMouseMove={handleMouseMove} onScroll={handleScroll} sx={{ height: '100vh', overflow: 'auto' }}>
@@ -59,12 +69,13 @@ const MainComponent = () => {
             position: 'absolute',
             right: '25%',
             top: '50%',
-            transform: `translate(-50%, -50%) rotateY(${rotation.y}deg) rotateX(${rotation.x}deg)`,
+            // transform: `translate(-50%, -50%) rotateY(${rotation.y}deg) rotateX(${rotation.x}deg)`,
+            transform: `translate(-50%, -50%)`,
             width: '390px',
             height: '425px',
-            transition: 'transform 0.1s ease-out',
+            transition: 'transform 0.1s ease-out, filter 0.5s ease-out',
             // filter: `hue-rotate(${scrollPosition / 10}deg)`,
-            filter: `drop-shadow(1px 3px 100px blue) drop-shadow(46px -10px 30px green)`,
+            filter: `drop-shadow(1px 3px 100px ${generateRandomColor(mousePosition.x)}) drop-shadow(46px -10px 30px ${generateRandomColor()})`,
           }}
         />
          <Typography variant="h2" fontFamily={"Montserrat Alternates"} fontWeight={"bolder"} sx={{ mr: '5%' }} color="azure">

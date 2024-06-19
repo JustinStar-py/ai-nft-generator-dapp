@@ -5,7 +5,9 @@ import { Box, Grid, TextField,
 import axios from 'axios';
 import { Buffer } from 'buffer';
 import ERC721ABI from '../assets/abi/ERC721ABI.json';
-import { useSimulateContract, useWriteContract } from 'wagmi';
+import { useSimulateContract, useWriteContract} from 'wagmi';
+import toast, { Toaster } from 'react-hot-toast';
+
 
 const MintingModal = ({ open, handleClose, handleMint, nftMetadata, setNftMetadata }) => {
   const [name, setName] = React.useState('');
@@ -133,7 +135,7 @@ const MyComponent = () => {
      method: '',
      status: false
   });
-  const { writeContract } = useWriteContract()
+  const { writeContractAsync, status: writeStatus  } = useWriteContract()
 
   const handleGenerate = async () => {
     if (isLoading.status === true) return;
@@ -190,7 +192,7 @@ const MyComponent = () => {
         if (response.status === 200) {
           setOpenMintingModal(false);
           setIsLoading({ ...isLoading, method: 'mint' });
-          await writeContract({
+          await writeContractAsync({
               abi: ERC721ABI,
               address: '0x0842AC2C94e6f8439B5256bCec61Cd68b2A7bbEf',
               functionName: 'mint',
@@ -200,19 +202,34 @@ const MyComponent = () => {
     })
   }
 
-  // React.useEffect(() => {
-  //   // post image to server and get response
-  //   if (imgUrl !== '' && imgUrl !== undefined) {
-  //     const postImage = async () => {
-  //       await axios.post('http://localhost:5000/upload-image-to-ipfs', { 
-  //         image: imgUrl
-  //       }).then((response) => {
-  //          console.log(response);
-  //       })
-  //     }
-  //     postImage();
-  //   }
-  // }, [imgUrl])
+  React.useEffect(() => {
+
+    if (isLoading.method === 'mint') {
+       if (writeStatus === 'success') {
+           setOpenMintingModal(false);
+           toast.success('NFT minted successfully!');
+           setIsLoading({ status: false, method: '' });
+       } else if (writeStatus === 'error') {
+           setIsLoading({ status: false, method: '' });
+           toast.error('NFT minting failed!');
+       } else if (writeStatus === 'pending') {
+           setIsLoading({ status: true, method: 'mint' });
+           toast.loading('Sending transaction...');
+       } 
+    }
+    
+    if (isLoading.status) {
+       if (isLoading.method === 'generate') {
+        toast.loading('Generating image...');
+      }  else if (isLoading.method === 'ipfs-upload') {
+        toast.loading('Uploading image to IPFS...');
+      }
+    } else {
+      toast.dismiss();
+      setIsLoading({ status: false, method: '' });
+    }
+  
+  }, [writeStatus, isLoading]);
 
   return (
     <Box
@@ -224,6 +241,7 @@ const MyComponent = () => {
         overflow: 'hidden',
       }}
     >
+      <Toaster />
       <Grid container sx={{ height: '100%' }} position="absolute" alignItems="right" justifyContent="right" top={'10px'} right={'10px'} zIndex={1}>
         <w3m-button />
       </Grid> 
@@ -260,7 +278,6 @@ const MyComponent = () => {
                onClick={handleGenerate}
                sx={buttonStyle}>
                 {isLoading.method === 'generate' ? <div>
-                  Generating...
                   <CircularProgress size={15} thickness={8} sx={{ verticalAlign: 'middle', m: 1 }} />
                 </div> : 'Generate Image'}
               </Button>
@@ -270,12 +287,11 @@ const MyComponent = () => {
                 sx={buttonStyle}> 
                     {/*  if method is mint show minting with progress , and then if no, if the method is ipfs-upload show 'ipfs uploading' ,if no show mint */}
                     {isLoading.method === 'mint' ? <div>
-                      Minting...
                       <CircularProgress size={15} thickness={8} sx={{ verticalAlign: 'middle', m: 1 }} />
                     </div> : 
                       isLoading.method === 'ipfs-upload' ? 
                         <div> 
-                            IPFS Uploading... <CircularProgress size={15} thickness={8} sx={{ verticalAlign: 'middle', m: 1 }} />
+                            <CircularProgress size={15} thickness={8} sx={{ verticalAlign: 'middle', m: 1 }} />
                         </div> : 'Mint it!'
                     }
                 </Button>
